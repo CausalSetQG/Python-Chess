@@ -1,1 +1,171 @@
-#
+#Chess game in python without GUI
+#Will add GUI later
+
+#Lets start with the pieces
+class Piece:
+    # This is the base class for all the pieces
+    def __init__(self, color, position, symbol, unmoved):
+        self.color = color
+        self.position = position
+        self.symbol = symbol.upper() if color == 'white' else symbol.lower()
+        self.unmoved = unmoved
+
+    # Ensures that when we print a piece, we get the symbol 
+    def __str__(self):
+        return self.symbol
+
+    # This method will mirrors the white pices to create the black pieces
+    def clone_and_mirror(self):
+        color = "black" if self.color == "white" else "white"
+        position = (7-self.position[0], self.position[1])
+        return type(self)(color, position)
+
+# Piece specific classes
+class Pawn(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position, 'P', True)
+    def available_squares(self, board):
+        # This method will return a list of all the available squares for the pawn
+        available_squares = []
+        # Direction of movement based on color
+        direction = 1 if self.color == 'white' else -1
+        potential_square = (self.position[0]+direction, self.position[1])
+        if board[potential_square[0]][potential_square[1]] is None:
+            available_squares.append(potential_square)
+            # If the pawn has not moved, it can move 2 squares
+            # Indented such that it doesnt move through an occupied square
+            if self.unmoved == True:
+                potential_square = (self.position[0]+2*direction, self.position[1])
+                if board[potential_square[0]][potential_square[1]] is None:
+                    available_squares.append(potential_square)
+        # Check for diagonal captures
+        for i in [-1, 1]:
+            potential_square = (self.position[0]+direction, self.position[1]+i)
+            if 0 <= potential_square[0] <= 7 and 0 <= potential_square[1] <= 7:
+                if board[potential_square[0]][potential_square[1]] is not None:
+                    if board[potential_square[0]][potential_square[1]].color != self.color:
+                        available_squares.append(potential_square)
+        return available_squares
+
+        
+        
+
+
+class Rook(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position, 'R', True)
+class Knight(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position, 'N', True)
+class Bishop(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position, 'B', True)
+class Queen(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position, 'Q', True)
+class King(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position, 'K', True)
+
+
+# Lets start with the board
+
+class Board:
+    def __init__(self):
+        self.board = [[None for _ in range(8)] for _ in range(8)] # 8x8 board with no pieces
+        self.set_up_board()
+
+    # We assign alphanumeric values to the squares
+    @staticmethod
+    def from_alphanumeric(alphanumeric):
+        #Convert alphanumeric to coordinate
+        column, row = alphanumeric
+        column = ord(column) - ord('a')
+        row = int(row) - 1
+        return row, column
+
+    @staticmethod
+    def to_alphanumeric(row, column):
+        #Convert coordinate to alphanumeric
+        row += 1
+        column = chr(column + ord('a'))
+        return column + str(row)
+
+    # This method will set up the board
+    def set_up_board(self):
+        # Pawns
+        for i in range(8):
+            self.board[1][i] = Pawn("white", (1, i))
+        # Rooks
+        self.board[0][0] = Rook("white", (0, 0))
+        self.board[0][7] = Rook("white", (0, 7))
+        # Knights
+        self.board[0][1] = Knight("white", (0, 1))
+        self.board[0][6] = Knight("white", (0, 6))
+        # Bishops
+        self.board[0][2] = Bishop("white", (0, 2))
+        self.board[0][5] = Bishop("white", (0, 5))
+        # Queen
+        self.board[0][3] = Queen("white", (0, 3))
+        # King
+        self.board[0][4] = King("white", (0, 4))
+
+
+        # Mirror the white pieces to create the black pieces
+        for i in range(2):
+            for j in range(8):
+                piece = self.board[i][j]
+                if piece is not None:  # add a check here to avoid trying to clone None
+                    self.board[7-i][j] = piece.clone_and_mirror()
+
+    # This method will print the board
+    def print_board(self):
+        for row in self.board:
+            for cell in row:
+                if cell is None:
+                    print("X ", end="")  # print 'X' for empty spaces
+                else:
+                    print(str(cell) + " ", end="")  
+            print()  # this will make sure each row is printed on a new line
+
+    # This method will return the piece at a given position
+    def get_piece_at(self, position):
+        row, column = position
+        return self.board[row][column]
+
+    # This method will move the piece
+    def move_piece(self, old_position, new_position):
+        piece = self.get_piece_at(old_position)
+        if piece is None:
+            raise ValueError("No piece at position {}".format(old_position))
+        piece.move(self, new_position)
+
+# Function for inputting piece movement
+def make_move(board, move):
+    start, end = move  # split the move into start and end squares
+    # convert the squares to coordinates
+    start = Board.from_alphanumeric(start)
+    end = Board.from_alphanumeric(end)
+
+    piece = board.get_piece_at(start)
+    if piece is None:
+        raise ValueError("No piece at the starting square of the move")
+    
+    if isinstance(piece, Pawn):
+        if end in piece.available_squares():
+            board.move_piece(start, end)
+        else:
+            raise ValueError("Invalid move for pawn")
+    else:
+        raise ValueError("Only pawn movement is implemented at this moment")
+
+# Lets start with the game
+input("Press enter to start the game")
+b = Board()
+b.print_board()
+print("White's turn")
+move = input("Enter your move in the format 'e2 e4': ")
+move = tuple(move.split())  # split the input string into start and end parts
+make_move(b, move)
+b.print_board()
+
