@@ -30,49 +30,167 @@ class Pawn(Piece):
         # Direction of movement based on color
         direction = 1 if self.color == 'white' else -1
         potential_square = (self.position[0]+direction, self.position[1])
-        if board[potential_square[0]][potential_square[1]] is None:
+        if board.board[potential_square[0]][potential_square[1]] is None:
             available_squares.append(potential_square)
             # If the pawn has not moved, it can move 2 squares
             # Indented such that it doesnt move through an occupied square
             if self.unmoved == True:
                 potential_square = (self.position[0]+2*direction, self.position[1])
-                if board[potential_square[0]][potential_square[1]] is None:
+                if board.board[potential_square[0]][potential_square[1]] is None:
                     available_squares.append(potential_square)
         # Check for diagonal captures
         for i in [-1, 1]:
             potential_square = (self.position[0]+direction, self.position[1]+i)
             if 0 <= potential_square[0] <= 7 and 0 <= potential_square[1] <= 7:
-                if board[potential_square[0]][potential_square[1]] is not None:
-                    if board[potential_square[0]][potential_square[1]].color != self.color:
+                if board.board[potential_square[0]][potential_square[1]] is not None:
+                    if board.board[potential_square[0]][potential_square[1]].color != self.color:
                         available_squares.append(potential_square)
         return available_squares
-
-        
-        
-
 
 class Rook(Piece):
     def __init__(self, color, position):
         super().__init__(color, position, 'R', True)
+    def available_squares(self, board):
+        # This method will return a list of all the available squares for the rook
+        available_squares = []
+        
+# Checking squares in each of the four directions until a piece is encountered or the edge of the board is reached.
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)] # right, down, left, up
+        for direction in directions:
+            for i in range(1, 8):
+                row = self.position[0] + direction[0] * i
+                col = self.position[1] + direction[1] * i
+                
+                # Stop if the square is outside the board.
+                if row < 0 or row > 7 or col < 0 or col > 7:
+                    break
+                
+                # If the square is empty, it is a valid move.
+                if board.board[row][col] is None:
+                    available_squares.append((row, col))
+                
+                # If the square is not empty, it's a valid move only if the piece on the square is of the opposite color.
+                # In either case, stop checking in this direction.
+                else:
+                    if board.board[row][col].color != self.color:
+                        available_squares.append((row, col))
+                    break
+          
+        return available_squares
+
 class Knight(Piece):
     def __init__(self, color, position):
         super().__init__(color, position, 'N', True)
+    def available_squares(self, board):
+        # This method will return a list of all the available squares for the knight
+        available_squares = []
+        # Check all 8 possible squares
+        jumps = [(1, 2), (2, 1), (-1, 2), (-2, 1), (1, -2), (2, -1), (-1, -2), (-2, -1)]
+        for jump in jumps:
+            row = self.position[0] + jump[0]
+            col = self.position[1] + jump[1]
+            # If the square is on the board 
+            if 0 <= row <= 7 and 0 <= col <= 7:    
+                # If the square is empty, or a piece of the opposite colour, it is a valid move.
+                if board.board[row][col] is None or board.board[row][col].color != self.color:
+                    available_squares.append((row, col))
+        return available_squares
+
 class Bishop(Piece):
     def __init__(self, color, position):
         super().__init__(color, position, 'B', True)
+    def available_squares(self, board):
+    # This method will return a list of all the available squares for the bishop
+        available_squares = []   
+    # Checking squares in each of the four directions until a piece is encountered or the edge of the board is reached.
+        directions = [(1, 1), (1, -1), (-1, -1), (-1, 1)] # upright, upleft, downleft, downright
+        for direction in directions:
+            for i in range(1, 8):
+                row = self.position[0] + direction[0] * i
+                col = self.position[1] + direction[1] * i
+                
+                # Stop if the square is outside the board.
+                if row < 0 or row > 7 or col < 0 or col > 7:
+                    break
+                
+                # If the square is empty, it is a valid move.
+                if board.board[row][col] is None:
+                    available_squares.append((row, col))
+                
+                    # If the square is not empty, it's a valid move only if the piece on the square is of the opposite color.
+                    # In either case, stop checking in this direction.
+                else:
+                    if board.board[row][col].color != self.color:
+                        available_squares.append((row, col))
+                        break
+          
+        return available_squares
+    
 class Queen(Piece):
     def __init__(self, color, position):
         super().__init__(color, position, 'Q', True)
+    def available_squares(self, board):
+    # This method will return a list of all the available squares for the knight
+        available_squares = []   
+    # Checking squares in each of the four directions until a piece is encountered or the edge of the board is reached.
+        directions = [(1, 1), (1, -1), (-1, -1), (-1, 1),(0, 1), (1, 0), (0, -1), (-1, 0)] # upright, upleft, downleft, downright, up, right, down, left
+        for direction in directions:
+            for i in range(1, 8):
+                row = self.position[0] + direction[0] * i
+                col = self.position[1] + direction[1] * i
+                
+                # Stop if the square is outside the board.
+                if row < 0 or row > 7 or col < 0 or col > 7:
+                    break
+                
+                # If the square is empty, it is a valid move.
+                if board.board[row][col] is None:
+                    available_squares.append((row, col))
+                
+                    # If the square is not empty, it's a valid move only if the piece on the square is of the opposite color.
+                    # In either case, stop checking in this direction.
+                else:
+                    if board.board[row][col].color != self.color:
+                        available_squares.append((row, col))
+                        break
+          
+        return available_squares
+    
 class King(Piece):
     def __init__(self, color, position):
         super().__init__(color, position, 'K', True)
-
+    def available_squares(self, board):
+    # This method will return a list of all the available squares for the knight
+        available_squares = []   
+    # Checking squares in each of the four directions until a piece is encountered or the edge of the board is reached.
+        directions = [(1, 1), (1, -1), (-1, -1), (-1, 1),(0, 1), (1, 0), (0, -1), (-1, 0)] # upright, upleft, downleft, downright, up, right, down, left
+        for direction in directions:
+            row = self.position[0] + direction[0]
+            col = self.position[1] + direction[1]
+                
+            # Stop if the square is outside the board.
+            if row < 0 or row > 7 or col < 0 or col > 7:
+                break
+                
+            # If the square is empty, it is a valid move.
+            if board.board[row][col] is None:
+                available_squares.append((row, col))
+                
+                # If the square is not empty, it's a valid move only if the piece on the square is of the opposite color.
+                # In either case, stop checking in this direction.
+            else:
+                if board.board[row][col].color != self.color:
+                    available_squares.append((row, col))
+                    break
+          
+        return available_squares
 
 # Lets start with the board
 
 class Board:
     def __init__(self):
         self.board = [[None for _ in range(8)] for _ in range(8)] # 8x8 board with no pieces
+        self.turn = "white"
         self.set_up_board()
 
     # We assign alphanumeric values to the squares
@@ -120,7 +238,7 @@ class Board:
 
     # This method will print the board
     def print_board(self):
-        for row in self.board:
+        for row in reversed(self.board):
             for cell in row:
                 if cell is None:
                     print("X ", end="")  # print 'X' for empty spaces
@@ -132,40 +250,45 @@ class Board:
     def get_piece_at(self, position):
         row, column = position
         return self.board[row][column]
-
-    # This method will move the piece
+    
     def move_piece(self, old_position, new_position):
+        # This method will move a piece from one position to another
         piece = self.get_piece_at(old_position)
-        if piece is None:
-            raise ValueError("No piece at position {}".format(old_position))
-        piece.move(self, new_position)
-
+          # Remove the piece from the old position
+        old_row, old_col = old_position
+        self.board[old_row][old_col] = None
+        # Put the piece at the new position
+        new_row, new_col = new_position
+        self.board[new_row][new_col] = piece
+        # Update the piece's position
+        piece.position = new_position
+        # The piece has been moved, so update its unmoved status
+        piece.unmoved = False
+        self.turn = "white" if self.turn == "black" else "black"
+        print(str(self.turn) +"'s turn:  ")
+        
 # Function for inputting piece movement
-def make_move(board, move):
-    start, end = move  # split the move into start and end squares
+def make_move(board, squares):
+    start, end = squares  # split the move into start and end squares
     # convert the squares to coordinates
     start = Board.from_alphanumeric(start)
     end = Board.from_alphanumeric(end)
-
-    piece = board.get_piece_at(start)
-    if piece is None:
-        raise ValueError("No piece at the starting square of the move")
-    
-    if isinstance(piece, Pawn):
-        if end in piece.available_squares():
+    piece = board.get_piece_at(start)  # get the piece at the start position
+    if piece is not None and piece.color == board.turn:
+        if end in piece.available_squares(board):  # get the available squares for the piece
             board.move_piece(start, end)
-        else:
-            raise ValueError("Invalid move for pawn")
+        else: 
+            raise ValueError("Invalid move")
     else:
-        raise ValueError("Only pawn movement is implemented at this moment")
+        raise ValueError("No piece at the starting square of the move")
 
 # Lets start with the game
 input("Press enter to start the game")
 b = Board()
 b.print_board()
-print("White's turn")
-move = input("Enter your move in the format 'e2 e4': ")
-move = tuple(move.split())  # split the input string into start and end parts
-make_move(b, move)
-b.print_board()
-
+game_over = False
+while game_over == False:
+    move = input("Enter your move:  ")
+    move = tuple(move.split())  # split the input string into start and end parts
+    make_move(b, move)
+    b.print_board()
