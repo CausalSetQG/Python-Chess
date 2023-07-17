@@ -1,5 +1,4 @@
-#Chess game in python without GUI
-#Will add GUI later
+#Chess game in python with GUI
 
 #Lets start with the pieces
 class Piece:
@@ -281,7 +280,7 @@ def make_move(board, squares):
             raise ValueError("Invalid move")
     else:
         raise ValueError("No piece at the starting square of the move")
-
+    
 import tkinter as tk
 
 class ChessBoard(tk.Tk):
@@ -289,19 +288,24 @@ class ChessBoard(tk.Tk):
         super().__init__()
 
         self.title("Chess Game")
-        self.geometry("480x480")
+        self.geometry("540x480")
 
         self.board = Board()
 
         # Create a canvas to draw the board
         self.canvas = tk.Canvas(self, width=480, height=480)
-        self.canvas.pack()
+        self.canvas.pack(side=tk.LEFT)
+
+        # Create an entry to input moves
+        self.move_entry = tk.Entry(self, width=8)
+        self.move_entry.pack(side=tk.TOP)
+
+        # Create a button to submit moves
+        self.submit_button = tk.Button(self, text="Submit move", command=self.submit_move)
+        self.submit_button.pack(side=tk.TOP)
 
         # Draw the board
         self.draw_board()
-
-        # Redraw the board whenever a square is clicked
-        self.canvas.bind("<Button-1>", self.on_square_click)
 
     def draw_board(self):
         self.canvas.delete("all")  # Clear the canvas
@@ -320,18 +324,20 @@ class ChessBoard(tk.Tk):
                 piece = self.board.get_piece_at((7-j, i))
                 if piece is not None:
                     x, y = i*60+30, j*60+30  # Center of the square
-                    self.canvas.create_text(x, y, text=str(piece), font=("Arial", 20))
+                    text_color = "black" if (i+j) % 2 == 0 else "white"
+                    self.canvas.create_text(x, y, text=str(piece), fill=text_color, font=("Arial", 20))
 
-    def on_square_click(self, event):
-        x, y = event.x//60, 7-event.y//60  # Convert pixel coordinates to chess board coordinates
-        # Here you could add code to handle the user's move...
-
-# Create and run the GUI
-app = ChessBoard()
-app.mainloop()
+    def submit_move(self):
+        move = self.move_entry.get()  # Get the text from the entry
+        move = tuple(move.split())  # Split the input string into start and end parts
+        make_move(self.board, move)  # Make the move
+        self.draw_board()  # Redraw the board
 
 # Lets start with the game
 input("Press enter to start the game")
+# Create and run the GUI
+app = ChessBoard()
+app.mainloop()
 b = Board()
 b.print_board()
 game_over = False
